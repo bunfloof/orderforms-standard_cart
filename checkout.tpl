@@ -61,6 +61,112 @@
         padding-top: 30px;
     }
 }
+
+/* Payment methods: one per row, gateway name on the left, logo on the right. */
+#order-standard_cart .payment-methods-list {
+    text-align: left;
+    margin-top: 10px;
+    border: 1px solid rgba(128, 128, 128, 0.35);
+    border-radius: 8px;
+    overflow: hidden;
+}
+#order-standard_cart .payment-method-row {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin: 0;
+    padding: 14px 16px;
+    border: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 0;
+    cursor: pointer;
+    background-color: #ffffff;
+    color: #222222;
+    transition: background-color .15s ease;
+}
+#order-standard_cart .payment-method-row:last-child {
+    border-bottom: 0;
+}
+#order-standard_cart .payment-method-row:hover {
+    background-color: #f5f5f5;
+}
+#order-standard_cart .payment-method-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+#order-standard_cart .payment-method-name {
+    font-weight: 600;
+}
+#order-standard_cart .payment-method-logo {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+}
+#order-standard_cart .payment-method-logo img {
+    max-height: 26px;
+    width: auto;
+}
+
+/* Stacked field labels: label sits above the input. */
+#order-standard_cart .stacked-field {
+    margin-bottom: 16px;
+}
+#order-standard_cart .stacked-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.85em;
+    font-weight: 500;
+    opacity: 0.85;
+}
+#order-standard_cart .stacked-field .field,
+#order-standard_cart .stacked-field .form-control {
+    width: 100%;
+}
+#order-standard_cart .required-asterisk {
+    color: #e25555;
+    margin-left: 2px;
+}
+#order-standard_cart .optional-hint {
+    font-weight: 400;
+    font-size: 0.95em;
+    opacity: 0.6;
+}
+
+/* Account-type tabs, styled like the cart's promo tabs (nav-tabs). */
+#order-standard_cart .account-type-tabs {
+    margin-bottom: 18px;
+}
+#order-standard_cart .account-type-tabs .nav-link {
+    cursor: pointer;
+}
+/* Legacy toggle buttons stay in the DOM (their handlers run the slide logic) but are hidden. */
+#order-standard_cart .account-tabs-legacy { display: none !important; }
+
+/* Cart actions row: Continue Shopping (left) and Empty Cart (right). */
+#order-standard_cart .empty-cart {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+}
+#order-standard_cart .continue-shopping-link {
+    font-size: 0.9em;
+    color: inherit;
+    opacity: 0.85;
+}
+#order-standard_cart .continue-shopping-link:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+
+/* Space between the cart items and the Apply Promo Code tab */
+#order-standard_cart .view-cart-tabs {
+    margin-top: 20px;
+}
 </style>
 
     <div class="row">
@@ -107,7 +213,24 @@
                             <input type="hidden" id="isTaxInclusiveDeduct" value="true">
                         {/if}
 
-                        <div class="already-registered clearfix">
+                        {if !$loggedin}
+                        <div class="account-type-tabs">
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="nav-item{if $custtype eq "existing"} active{/if}">
+                                    <a href="#" class="nav-link account-type-link{if $custtype eq "existing"} active{/if}" data-account-type="existing" role="tab">
+                                        {$LANG.orderForm.alreadyRegistered}
+                                    </a>
+                                </li>
+                                <li role="presentation" class="nav-item{if $custtype neq "existing"} active{/if}">
+                                    <a href="#" class="nav-link account-type-link{if $custtype neq "existing"} active{/if}" data-account-type="new" role="tab">
+                                        {$LANG.orderForm.createAccount}
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        {/if}
+
+                        <div class="already-registered clearfix account-tabs-legacy">
                             <div class="pull-right float-right">
                                 <button type="button" class="btn btn-info{if $loggedin || !$loggedin && $custtype eq "existing"} w-hidden{/if}" id="btnAlreadyRegistered">
                                     {$LANG.orderForm.alreadyRegistered}
@@ -183,19 +306,21 @@
 
                     <div class="row">
                         <div class="col-sm-6">
-                            <div class="form-group prepend-icon">
-                                <label for="inputLoginEmail" class="field-icon">
-                                    <i class="fas fa-envelope"></i>
-                                </label>
-                                <input type="text" name="loginemail" id="inputLoginEmail" class="field form-control" placeholder="{$LANG.orderForm.emailAddress}" value="{$loginemail}">
+                            <div class="form-group stacked-field">
+                                <label for="inputLoginEmail" class="stacked-label">{$LANG.orderForm.emailAddress}<span class="required-asterisk">*</span></label>
+                                <div class="prepend-icon">
+                                    <label for="inputLoginEmail" class="field-icon"><i class="fas fa-envelope"></i></label>
+                                    <input type="text" name="loginemail" autocomplete="email" id="inputLoginEmail" class="field form-control" placeholder="{$LANG.orderForm.emailAddress}" value="{$loginemail}">
+                                </div>
                             </div>
                         </div>
                         <div class="col-sm-6">
-                            <div class="form-group prepend-icon">
-                                <label for="inputLoginPassword" class="field-icon">
-                                    <i class="fas fa-lock"></i>
-                                </label>
-                                <input type="password" name="loginpassword" id="inputLoginPassword" class="field form-control" placeholder="{$LANG.clientareapassword}">
+                            <div class="form-group stacked-field">
+                                <label for="inputLoginPassword" class="stacked-label">{$LANG.clientareapassword}<span class="required-asterisk">*</span></label>
+                                <div class="prepend-icon">
+                                    <label for="inputLoginPassword" class="field-icon"><i class="fas fa-lock"></i></label>
+                                    <input type="password" name="loginpassword" autocomplete="current-password" id="inputLoginPassword" class="field form-control" placeholder="{$LANG.clientareapassword}">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -233,35 +358,36 @@
 
                     <div class="row">
                         <div class="col-sm-6">
-                            <div class="form-group prepend-icon">
-                                <label for="inputFirstName" class="field-icon">
-                                    <i class="fas fa-user"></i>
-                                </label>
-                                <input type="text" name="firstname" id="inputFirstName" class="field form-control" placeholder="{$LANG.orderForm.firstName}" value="{$clientsdetails.firstname}" autofocus>
+                            <div class="form-group stacked-field">
+                                <label for="inputFirstName" class="stacked-label">{$LANG.orderForm.firstName}{if !in_array('firstname', $clientsProfileOptionalFields)}<span class="required-asterisk">*</span>{else} <span class="optional-hint">(Optional)</span>{/if}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputFirstName" class="field-icon"><i class="fas fa-user"></i></label>
+                                    <input type="text" name="firstname" autocomplete="given-name" id="inputFirstName" class="field form-control" placeholder="{$LANG.orderForm.firstName}" value="{$clientsdetails.firstname}" autofocus>
+                                </div>
                             </div>
                         </div>
                         <div class="col-sm-6">
-                            <div class="form-group prepend-icon">
-                                <label for="inputLastName" class="field-icon">
-                                    <i class="fas fa-user"></i>
-                                </label>
-                                <input type="text" name="lastname" id="inputLastName" class="field form-control" placeholder="{$LANG.orderForm.lastName}" value="{$clientsdetails.lastname}">
+                            <div class="form-group stacked-field">
+                                <label for="inputLastName" class="stacked-label">{$LANG.orderForm.lastName}{if !in_array('lastname', $clientsProfileOptionalFields)}<span class="required-asterisk">*</span>{else} <span class="optional-hint">(Optional)</span>{/if}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputLastName" class="field-icon"><i class="fas fa-user"></i></label>
+                                    <input type="text" name="lastname" autocomplete="family-name" id="inputLastName" class="field form-control" placeholder="{$LANG.orderForm.lastName}" value="{$clientsdetails.lastname}">
+                                </div>
                             </div>
                         </div>
                         <div class="col-sm-6">
-                            <div class="form-group prepend-icon">
-                                <label for="inputEmail" class="field-icon">
-                                    <i class="fas fa-envelope"></i>
-                                </label>
-                                <input type="email" name="email" id="inputEmail" class="field form-control" placeholder="{$LANG.orderForm.emailAddress}" value="{$clientsdetails.email}">
+                            <div class="form-group stacked-field">
+                                <label for="inputEmail" class="stacked-label">{$LANG.orderForm.emailAddress}{if !in_array('email', $clientsProfileOptionalFields)}<span class="required-asterisk">*</span>{else} <span class="optional-hint">(Optional)</span>{/if}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputEmail" class="field-icon"><i class="fas fa-envelope"></i></label>
+                                    <input type="email" name="email" autocomplete="email" id="inputEmail" class="field form-control" placeholder="{$LANG.orderForm.emailAddress}" value="{$clientsdetails.email}">
+                                </div>
                             </div>
                         </div>
                         <div class="col-sm-6">
-                            <div class="form-group prepend-icon">
-                                <label for="inputPhone" class="field-icon">
-                                    <i class="fas fa-phone"></i>
-                                </label>
-                                <input type="tel" name="phonenumber" id="inputPhone" class="field form-control" placeholder="{$LANG.orderForm.phoneNumber}" value="{$clientsdetails.phonenumber}">
+                            <div class="form-group stacked-field">
+                                <label for="inputPhone" class="stacked-label">{$LANG.orderForm.phoneNumber}{if !in_array('phonenumber', $clientsProfileOptionalFields)}<span class="required-asterisk">*</span>{else} <span class="optional-hint">(Optional)</span>{/if}</label>
+                                <input type="tel" name="phonenumber" autocomplete="tel" id="inputPhone" class="field form-control" placeholder="{$LANG.orderForm.phoneNumber}" value="{$clientsdetails.phonenumber}">
                             </div>
                         </div>
                     </div>
@@ -272,78 +398,83 @@
 
                     <div class="row">
                         <div class="col-sm-12">
-                            <div class="form-group prepend-icon">
-                                <label for="inputCompanyName" class="field-icon">
-                                    <i class="fas fa-building"></i>
-                                </label>
-                                <input type="text" name="companyname" id="inputCompanyName" class="field form-control" placeholder="{$LANG.orderForm.companyName} ({$LANG.orderForm.optional})" value="{$clientsdetails.companyname}">
+                            <div class="form-group stacked-field">
+                                <label for="inputCompanyName" class="stacked-label">{$LANG.orderForm.companyName} ({$LANG.orderForm.optional})</label>
+                                <div class="prepend-icon">
+                                    <label for="inputCompanyName" class="field-icon"><i class="fas fa-building"></i></label>
+                                    <input type="text" name="companyname" autocomplete="organization" id="inputCompanyName" class="field form-control" placeholder="{$LANG.orderForm.companyName} ({$LANG.orderForm.optional})" value="{$clientsdetails.companyname}">
+                                </div>
                             </div>
                         </div>
                         <div class="col-sm-12">
-                            <div class="form-group prepend-icon">
-                                <label for="inputAddress1" class="field-icon">
-                                    <i class="far fa-building"></i>
-                                </label>
-                                <input type="text" name="address1" id="inputAddress1" class="field form-control" placeholder="{$LANG.orderForm.streetAddress}" value="{$clientsdetails.address1}">
+                            <div class="form-group stacked-field">
+                                <label for="inputAddress1" class="stacked-label">{$LANG.orderForm.streetAddress}{if !in_array('address1', $clientsProfileOptionalFields)}<span class="required-asterisk">*</span>{else} <span class="optional-hint">(Optional)</span>{/if}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputAddress1" class="field-icon"><i class="far fa-building"></i></label>
+                                    <input type="text" name="address1" autocomplete="address-line1" id="inputAddress1" class="field form-control" placeholder="{$LANG.orderForm.streetAddress}" value="{$clientsdetails.address1}">
+                                </div>
                             </div>
                         </div>
                         <div class="col-sm-12">
-                            <div class="form-group prepend-icon">
-                                <label for="inputAddress2" class="field-icon">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                </label>
-                                <input type="text" name="address2" id="inputAddress2" class="field form-control" placeholder="{$LANG.orderForm.streetAddress2}" value="{$clientsdetails.address2}">
+                            <div class="form-group stacked-field">
+                                <label for="inputAddress2" class="stacked-label">{$LANG.orderForm.streetAddress2}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputAddress2" class="field-icon"><i class="fas fa-map-marker-alt"></i></label>
+                                    <input type="text" name="address2" autocomplete="address-line2" id="inputAddress2" class="field form-control" placeholder="{$LANG.orderForm.streetAddress2}" value="{$clientsdetails.address2}">
+                                </div>
                             </div>
                         </div>
                         <div class="col-sm-4">
-                            <div class="form-group prepend-icon">
-                                <label for="inputCity" class="field-icon">
-                                    <i class="far fa-building"></i>
-                                </label>
-                                <input type="text" name="city" id="inputCity" class="field form-control" placeholder="{$LANG.orderForm.city}" value="{$clientsdetails.city}">
+                            <div class="form-group stacked-field">
+                                <label for="inputCity" class="stacked-label">{$LANG.orderForm.city}{if !in_array('city', $clientsProfileOptionalFields)}<span class="required-asterisk">*</span>{else} <span class="optional-hint">(Optional)</span>{/if}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputCity" class="field-icon"><i class="far fa-building"></i></label>
+                                    <input type="text" name="city" autocomplete="address-level2" id="inputCity" class="field form-control" placeholder="{$LANG.orderForm.city}" value="{$clientsdetails.city}">
+                                </div>
                             </div>
                         </div>
                         <div class="col-sm-5">
-                            <div class="form-group prepend-icon">
-                                <label for="state" class="field-icon" id="inputStateIcon">
-                                    <i class="fas fa-map-signs"></i>
-                                </label>
-                                <label for="stateinput" class="field-icon" id="inputStateIcon">
-                                    <i class="fas fa-map-signs"></i>
-                                </label>
-                                <input type="text" name="state" id="inputState" class="field form-control" placeholder="{$LANG.orderForm.state}" value="{$clientsdetails.state}">
+                            <div class="form-group stacked-field">
+                                <label for="inputState" class="stacked-label">{$LANG.orderForm.state}{if !in_array('state', $clientsProfileOptionalFields)}<span class="required-asterisk">*</span>{else} <span class="optional-hint">(Optional)</span>{/if}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputState" class="field-icon"><i class="fas fa-map-signs"></i></label>
+                                    <input type="text" name="state" autocomplete="address-level1" id="inputState" class="field form-control" placeholder="{$LANG.orderForm.state}" value="{$clientsdetails.state}">
+                                </div>
                             </div>
                         </div>
                         <div class="col-sm-3">
-                            <div class="form-group prepend-icon">
-                                <label for="inputPostcode" class="field-icon">
-                                    <i class="fas fa-certificate"></i>
-                                </label>
-                                <input type="text" name="postcode" id="inputPostcode" class="field form-control" placeholder="{$LANG.orderForm.postcode}" value="{$clientsdetails.postcode}">
+                            <div class="form-group stacked-field">
+                                <label for="inputPostcode" class="stacked-label">{$LANG.orderForm.postcode}{if !in_array('postcode', $clientsProfileOptionalFields)}<span class="required-asterisk">*</span>{else} <span class="optional-hint">(Optional)</span>{/if}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputPostcode" class="field-icon"><i class="fas fa-certificate"></i></label>
+                                    <input type="text" name="postcode" autocomplete="postal-code" id="inputPostcode" class="field form-control" placeholder="{$LANG.orderForm.postcode}" value="{$clientsdetails.postcode}">
+                                </div>
                             </div>
                         </div>
                         <div class="col-sm-12">
-                            <div class="form-group prepend-icon">
-                                <label for="inputCountry" class="field-icon" id="inputCountryIcon">
-                                    <i class="fas fa-globe"></i>
-                                </label>
-                                <select name="country" id="inputCountry" class="field form-control">
+                            <div class="form-group stacked-field">
+                                <label for="inputCountry" class="stacked-label">{$LANG.orderForm.country}{if !in_array('country', $clientsProfileOptionalFields)}<span class="required-asterisk">*</span>{else} <span class="optional-hint">(Optional)</span>{/if}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputCountry" class="field-icon"><i class="fas fa-globe"></i></label>
+                                    <select name="country" autocomplete="country" id="inputCountry" class="field form-control">
                                     {foreach $countries as $countrycode => $countrylabel}
                                         <option value="{$countrycode}"{if (!$country && $countrycode == $defaultcountry) || $countrycode eq $country} selected{/if}>
                                             {$countrylabel}
                                         </option>
                                     {/foreach}
                                 </select>
+                                </div>
                             </div>
                         </div>
                         {if $showTaxIdField}
                             <div class="col-sm-12">
-                                <div class="form-group prepend-icon">
-                                    <label for="inputTaxId" class="field-icon">
-                                        <i class="fas fa-building"></i>
-                                    </label>
+                                <div class="form-group stacked-field">
+                                <label for="inputTaxId" class="stacked-label">{$taxLabel}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputTaxId" class="field-icon"><i class="fas fa-building"></i></label>
                                     <input type="text" name="tax_id" id="inputTaxId" class="field form-control" placeholder="{$taxLabel}" value="{$clientsdetails.tax_id}" autocomplete="off">
                                 </div>
+                            </div>
                             </div>
                         {/if}
                     </div>
@@ -422,90 +553,97 @@
                     <div{if $contact neq "addingnew"} class="w-hidden"{/if}>
                         <div class="row" id="domainRegistrantInputFields">
                             <div class="col-sm-6">
-                                <div class="form-group prepend-icon">
-                                    <label for="inputDCFirstName" class="field-icon">
-                                        <i class="fas fa-user"></i>
-                                    </label>
+                                <div class="form-group stacked-field">
+                                <label for="inputDCFirstName" class="stacked-label">{$LANG.orderForm.firstName}{if !in_array('firstname', $clientsProfileOptionalFields)}<span class="required-asterisk">*</span>{else} <span class="optional-hint">(Optional)</span>{/if}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputDCFirstName" class="field-icon"><i class="fas fa-user"></i></label>
                                     <input type="text" name="domaincontactfirstname" id="inputDCFirstName" class="field form-control" placeholder="{$LANG.orderForm.firstName}" value="{$domaincontact.firstname}">
                                 </div>
                             </div>
+                            </div>
                             <div class="col-sm-6">
-                                <div class="form-group prepend-icon">
-                                    <label for="inputDCLastName" class="field-icon">
-                                        <i class="fas fa-user"></i>
-                                    </label>
+                                <div class="form-group stacked-field">
+                                <label for="inputDCLastName" class="stacked-label">{$LANG.orderForm.lastName}{if !in_array('lastname', $clientsProfileOptionalFields)}<span class="required-asterisk">*</span>{else} <span class="optional-hint">(Optional)</span>{/if}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputDCLastName" class="field-icon"><i class="fas fa-user"></i></label>
                                     <input type="text" name="domaincontactlastname" id="inputDCLastName" class="field form-control" placeholder="{$LANG.orderForm.lastName}" value="{$domaincontact.lastname}">
                                 </div>
                             </div>
+                            </div>
                             <div class="col-sm-6">
-                                <div class="form-group prepend-icon">
-                                    <label for="inputDCEmail" class="field-icon">
-                                        <i class="fas fa-envelope"></i>
-                                    </label>
+                                <div class="form-group stacked-field">
+                                <label for="inputDCEmail" class="stacked-label">{$LANG.orderForm.emailAddress}{if !in_array('email', $clientsProfileOptionalFields)}<span class="required-asterisk">*</span>{else} <span class="optional-hint">(Optional)</span>{/if}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputDCEmail" class="field-icon"><i class="fas fa-envelope"></i></label>
                                     <input type="email" name="domaincontactemail" id="inputDCEmail" class="field form-control" placeholder="{$LANG.orderForm.emailAddress}" value="{$domaincontact.email}">
                                 </div>
                             </div>
+                            </div>
                             <div class="col-sm-6">
-                                <div class="form-group prepend-icon">
-                                    <label for="inputDCPhone" class="field-icon">
-                                        <i class="fas fa-phone"></i>
-                                    </label>
-                                    <input type="tel" name="domaincontactphonenumber" id="inputDCPhone" class="field form-control" placeholder="{$LANG.orderForm.phoneNumber}" value="{$domaincontact.phonenumber}">
-                                </div>
+                                <div class="form-group stacked-field">
+                                <label for="inputDCPhone" class="stacked-label">{$LANG.orderForm.phoneNumber}{if !in_array('phonenumber', $clientsProfileOptionalFields)}<span class="required-asterisk">*</span>{else} <span class="optional-hint">(Optional)</span>{/if}</label>
+                                <input type="tel" name="domaincontactphonenumber" id="inputDCPhone" class="field form-control" placeholder="{$LANG.orderForm.phoneNumber}" value="{$domaincontact.phonenumber}">
+                            </div>
                             </div>
                             <div class="col-sm-12">
-                                <div class="form-group prepend-icon">
-                                    <label for="inputDCCompanyName" class="field-icon">
-                                        <i class="fas fa-building"></i>
-                                    </label>
+                                <div class="form-group stacked-field">
+                                <label for="inputDCCompanyName" class="stacked-label">{$LANG.orderForm.companyName} ({$LANG.orderForm.optional})</label>
+                                <div class="prepend-icon">
+                                    <label for="inputDCCompanyName" class="field-icon"><i class="fas fa-building"></i></label>
                                     <input type="text" name="domaincontactcompanyname" id="inputDCCompanyName" class="field form-control" placeholder="{$LANG.orderForm.companyName} ({$LANG.orderForm.optional})" value="{$domaincontact.companyname}">
                                 </div>
                             </div>
+                            </div>
                             <div class="col-sm-12">
-                                <div class="form-group prepend-icon">
-                                    <label for="inputDCAddress1" class="field-icon">
-                                        <i class="far fa-building"></i>
-                                    </label>
+                                <div class="form-group stacked-field">
+                                <label for="inputDCAddress1" class="stacked-label">{$LANG.orderForm.streetAddress}{if !in_array('address1', $clientsProfileOptionalFields)}<span class="required-asterisk">*</span>{else} <span class="optional-hint">(Optional)</span>{/if}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputDCAddress1" class="field-icon"><i class="far fa-building"></i></label>
                                     <input type="text" name="domaincontactaddress1" id="inputDCAddress1" class="field form-control" placeholder="{$LANG.orderForm.streetAddress}" value="{$domaincontact.address1}">
                                 </div>
                             </div>
+                            </div>
                             <div class="col-sm-12">
-                                <div class="form-group prepend-icon">
-                                    <label for="inputDCAddress2" class="field-icon">
-                                        <i class="fas fa-map-marker-alt"></i>
-                                    </label>
+                                <div class="form-group stacked-field">
+                                <label for="inputDCAddress2" class="stacked-label">{$LANG.orderForm.streetAddress2}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputDCAddress2" class="field-icon"><i class="fas fa-map-marker-alt"></i></label>
                                     <input type="text" name="domaincontactaddress2" id="inputDCAddress2" class="field form-control" placeholder="{$LANG.orderForm.streetAddress2}" value="{$domaincontact.address2}">
                                 </div>
                             </div>
+                            </div>
                             <div class="col-sm-4">
-                                <div class="form-group prepend-icon">
-                                    <label for="inputDCCity" class="field-icon">
-                                        <i class="far fa-building"></i>
-                                    </label>
+                                <div class="form-group stacked-field">
+                                <label for="inputDCCity" class="stacked-label">{$LANG.orderForm.city}{if !in_array('city', $clientsProfileOptionalFields)}<span class="required-asterisk">*</span>{else} <span class="optional-hint">(Optional)</span>{/if}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputDCCity" class="field-icon"><i class="far fa-building"></i></label>
                                     <input type="text" name="domaincontactcity" id="inputDCCity" class="field form-control" placeholder="{$LANG.orderForm.city}" value="{$domaincontact.city}">
                                 </div>
                             </div>
+                            </div>
                             <div class="col-sm-5">
-                                <div class="form-group prepend-icon">
-                                    <label for="inputDCState" class="field-icon">
-                                        <i class="fas fa-map-signs"></i>
-                                    </label>
+                                <div class="form-group stacked-field">
+                                <label for="inputDCState" class="stacked-label">{$LANG.orderForm.state}{if !in_array('state', $clientsProfileOptionalFields)}<span class="required-asterisk">*</span>{else} <span class="optional-hint">(Optional)</span>{/if}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputDCState" class="field-icon"><i class="fas fa-map-signs"></i></label>
                                     <input type="text" name="domaincontactstate" id="inputDCState" class="field form-control" placeholder="{$LANG.orderForm.state}" value="{$domaincontact.state}">
                                 </div>
                             </div>
+                            </div>
                             <div class="col-sm-3">
-                                <div class="form-group prepend-icon">
-                                    <label for="inputDCPostcode" class="field-icon">
-                                        <i class="fas fa-certificate"></i>
-                                    </label>
+                                <div class="form-group stacked-field">
+                                <label for="inputDCPostcode" class="stacked-label">{$LANG.orderForm.postcode}{if !in_array('postcode', $clientsProfileOptionalFields)}<span class="required-asterisk">*</span>{else} <span class="optional-hint">(Optional)</span>{/if}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputDCPostcode" class="field-icon"><i class="fas fa-certificate"></i></label>
                                     <input type="text" name="domaincontactpostcode" id="inputDCPostcode" class="field form-control" placeholder="{$LANG.orderForm.postcode}" value="{$domaincontact.postcode}">
                                 </div>
                             </div>
+                            </div>
                             <div class="col-sm-12">
-                                <div class="form-group prepend-icon">
-                                    <label for="inputDCCountry" class="field-icon" id="inputCountryIcon">
-                                        <i class="fas fa-globe"></i>
-                                    </label>
+                                <div class="form-group stacked-field">
+                                <label for="inputDCCountry" class="stacked-label">{$LANG.orderForm.country}{if !in_array('country', $clientsProfileOptionalFields)}<span class="required-asterisk">*</span>{else} <span class="optional-hint">(Optional)</span>{/if}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputDCCountry" class="field-icon"><i class="fas fa-globe"></i></label>
                                     <select name="domaincontactcountry" id="inputDCCountry" class="field form-control">
                                         {foreach $countries as $countrycode => $countrylabel}
                                             <option value="{$countrycode}"{if (!$domaincontact.country && $countrycode == $defaultcountry) || $countrycode eq $domaincontact.country} selected{/if}>
@@ -515,13 +653,15 @@
                                     </select>
                                 </div>
                             </div>
+                            </div>
                             <div class="col-sm-12">
-                                <div class="form-group prepend-icon">
-                                    <label for="inputDCTaxId" class="field-icon">
-                                        <i class="fas fa-building"></i>
-                                    </label>
+                                <div class="form-group stacked-field">
+                                <label for="inputDCTaxId" class="stacked-label">{$taxLabel}</label>
+                                <div class="prepend-icon">
+                                    <label for="inputDCTaxId" class="field-icon"><i class="fas fa-building"></i></label>
                                     <input type="text" name="domaincontacttax_id" id="inputDCTaxId" class="field form-control" placeholder="{$taxLabel}" value="{$domaincontact.tax_id}" autocomplete="off">
                                 </div>
+                            </div>
                             </div>
                         </div>
                     </div>
@@ -539,20 +679,22 @@
                         <div id="containerPassword" class="row{if $remote_auth_prelinked && $securityquestions} w-hidden{/if}">
                             <div id="passwdFeedback" class="alert alert-info text-center col-sm-12 w-hidden"></div>
                             <div class="col-sm-6">
-                                <div class="form-group prepend-icon">
-                                    <label for="inputNewPassword1" class="field-icon">
-                                        <i class="fas fa-lock"></i>
-                                    </label>
-                                    <input type="password" name="password" id="inputNewPassword1" data-error-threshold="{$pwStrengthErrorThreshold}" data-warning-threshold="{$pwStrengthWarningThreshold}" class="field form-control" placeholder="{$LANG.clientareapassword}"{if $remote_auth_prelinked} value="{$password}"{/if}>
+                                <div class="form-group stacked-field">
+                                <label for="inputNewPassword1" class="stacked-label">{$LANG.clientareapassword}<span class="required-asterisk">*</span></label>
+                                <div class="prepend-icon">
+                                    <label for="inputNewPassword1" class="field-icon"><i class="fas fa-lock"></i></label>
+                                    <input type="password" name="password" autocomplete="new-password" id="inputNewPassword1" data-error-threshold="{$pwStrengthErrorThreshold}" data-warning-threshold="{$pwStrengthWarningThreshold}" class="field form-control" placeholder="{$LANG.clientareapassword}"{if $remote_auth_prelinked} value="{$password}"{/if}>
                                 </div>
                             </div>
+                            </div>
                             <div class="col-sm-6">
-                                <div class="form-group prepend-icon">
-                                    <label for="inputNewPassword2" class="field-icon">
-                                        <i class="fas fa-lock"></i>
-                                    </label>
-                                    <input type="password" name="password2" id="inputNewPassword2" class="field form-control" placeholder="{$LANG.clientareaconfirmpassword}"{if $remote_auth_prelinked} value="{$password}"{/if}>
+                                <div class="form-group stacked-field">
+                                <label for="inputNewPassword2" class="stacked-label">{$LANG.clientareaconfirmpassword}<span class="required-asterisk">*</span></label>
+                                <div class="prepend-icon">
+                                    <label for="inputNewPassword2" class="field-icon"><i class="fas fa-lock"></i></label>
+                                    <input type="password" name="password2" autocomplete="new-password" id="inputNewPassword2" class="field form-control" placeholder="{$LANG.clientareaconfirmpassword}"{if $remote_auth_prelinked} value="{$password}"{/if}>
                                 </div>
+                            </div>
                             </div>
                             <div class="col-sm-6">
                                 <button type="button" class="btn btn-default btn-sm generate-password" data-targetfields="inputNewPassword1,inputNewPassword2">
@@ -582,12 +724,13 @@
                                     </select>
                                 </div>
                                 <div class="col-sm-6">
-                                    <div class="form-group prepend-icon">
-                                        <label for="inputSecurityQAns" class="field-icon">
-                                            <i class="fas fa-lock"></i>
-                                        </label>
-                                        <input type="password" name="securityqans" id="inputSecurityQAns" class="field form-control" placeholder="{$LANG.clientareasecurityanswer}">
-                                    </div>
+                                    <div class="form-group stacked-field">
+                                <label for="inputSecurityQAns" class="stacked-label">{$LANG.clientareasecurityanswer}<span class="required-asterisk">*</span></label>
+                                <div class="prepend-icon">
+                                    <label for="inputSecurityQAns" class="field-icon"><i class="fas fa-lock"></i></label>
+                                    <input type="password" name="securityqans" id="inputSecurityQAns" class="field form-control" placeholder="{$LANG.clientareasecurityanswer}">
+                                </div>
+                            </div>
                                 </div>
                             </div>
                         {/if}
@@ -642,19 +785,29 @@
                     <div id="paymentGatewaysContainer" class="form-group">
                         <p class="small text-muted">{$LANG.orderForm.preferredPaymentMethod}</p>
 
-                        <div class="text-center">
+                        <div class="payment-methods-list">
                             {foreach $gateways as $gateway}
-                                <label class="radio-inline">
-                                    <input type="radio"
-                                           name="paymentmethod"
-                                           value="{$gateway.sysname}"
-                                           data-payment-type="{$gateway.payment_type}"
-                                           data-show-local="{$gateway.show_local_cards}"
-                                           data-remote-inputs="{$gateway.uses_remote_inputs}"
-                                           class="payment-methods{if $gateway.type eq "CC"} is-credit-card{/if}"
-                                            {if $selectedgateway eq $gateway.sysname} checked{/if}
-                                    />
-                                    {$gateway.name}
+                                {assign var="gwMatch" value=$gateway.sysname|cat:" "|cat:$gateway.name|lower}
+                                <label class="radio-inline payment-method-row">
+                                    <span class="payment-method-main">
+                                        <input type="radio"
+                                               name="paymentmethod"
+                                               value="{$gateway.sysname}"
+                                               data-payment-type="{$gateway.payment_type}"
+                                               data-show-local="{$gateway.show_local_cards}"
+                                               data-remote-inputs="{$gateway.uses_remote_inputs}"
+                                               class="payment-methods{if $gateway.type eq "CC"} is-credit-card{/if}"
+                                                {if $selectedgateway eq $gateway.sysname} checked{/if}
+                                        />
+                                        <span class="payment-method-name">{$gateway.name}</span>
+                                    </span>
+                                    <span class="payment-method-logo">
+                                        {if $gwMatch|strstr:"paypal"}
+                                            <img src="{$WEB_ROOT}/assets/img/gateways/paypal.svg" alt="{$gateway.name}" onerror="this.style.display='none'">
+                                        {elseif $gwMatch|strstr:"stripe"}
+                                            <img src="{$WEB_ROOT}/assets/img/gateways/stripe.svg" alt="{$gateway.name}" onerror="this.style.display='none'">
+                                        {/if}
+                                    </span>
                                 </label>
                             {/foreach}
                         </div>
@@ -901,6 +1054,7 @@
                                     &nbsp;<i class="fas fa-arrow-circle-right"></i>
                                 </button>
 
+
                             </div>
                         </div>
                     </div><!-- /.secondary-cart-sidebar -->
@@ -925,6 +1079,24 @@
 <script>
 // Re-measure the mailing-list toggle after the layout has fully settled so it
 // renders at the correct width inside the narrower column.
+// Account-type tabs (promo-tab style): drive the existing slide/show-hide handlers.
+(function () {
+    var root = document.getElementById('order-standard_cart');
+    if (!root || !window.jQuery) { return; }
+    jQuery(root).on('click', '.account-type-link', function (e) {
+        e.preventDefault();
+        var $link = jQuery(this);
+        if ($link.hasClass('active')) { return; }
+        $link.closest('.nav-tabs').find('.nav-item, .nav-link').removeClass('active');
+        $link.addClass('active').closest('.nav-item').addClass('active');
+        if ($link.attr('data-account-type') === 'existing') {
+            jQuery('#btnAlreadyRegistered').trigger('click');
+        } else {
+            jQuery('#btnNewUserSignup').trigger('click');
+        }
+    });
+})();
+
 jQuery(window).on('load', function () {
     if (jQuery.prototype.bootstrapSwitch) {
         var $optin = jQuery('.marketing-email-optin .toggle-switch-success');

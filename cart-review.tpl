@@ -413,6 +413,9 @@
 
                             {if $cartitems > 0}
                                 <div class="empty-cart">
+                                    <a href="{$WEB_ROOT}/store" class="continue-shopping-link">
+                                        <i class="fas fa-arrow-left"></i>&nbsp;Continue Shopping
+                                    </a>
                                     <button type="button" class="btn btn-link btn-xs" id="btnEmptyCart">
                                         <i class="fas fa-trash-alt"></i>
                                         <span>{$LANG.emptycart}</span>
