@@ -15,7 +15,53 @@
     window.langPasswordStrong = "{$LANG.pwstrengthstrong}";
     window.langVatErrorInvalidFormat = "{$LANG.tax.errorVatInvalidFormat}";
 </script>
-<div id="order-standard_cart">
+<div id="order-standard_cart" class="hide-cart-side-panels">
+<style>
+/* Cart-page layout overrides. Inlined on purpose: WHMCS caches the
+   external custom.css under a fixed ?v= hash, so edits to that file can
+   be ignored by the browser. Inline rules ship with the page HTML. */
+#order-standard_cart.hide-cart-side-panels .cart-sidebar,
+#order-standard_cart.hide-cart-side-panels .sidebar-collapsed {
+    display: none !important;
+}
+#order-standard_cart.hide-cart-side-panels .cart-body {
+    float: none;
+    width: 100%;
+}
+/* Match the View Cart / Configure Product pages: keep the float-based two
+   column layout so the theme's #scrollingPanelContainer scroll script drives
+   the Order Summary exactly the same way (and auto-disables it on mobile, where
+   the column becomes float:none and stacks below the form). Below 1200px the
+   base order-form stylesheet handles the responsive widths. */
+@media only screen and (min-width: 1200px) {
+    #order-standard_cart.hide-cart-side-panels .secondary-cart-body {
+        width: 73.75%;
+    }
+    #order-standard_cart.hide-cart-side-panels .secondary-cart-sidebar {
+        width: 26.25%;
+    }
+}
+
+/* Spacing under the merged cart-review section. */
+#order-standard_cart .cart-review-merged {
+    margin-bottom: 35px;
+}
+
+/* Keep the "Join our mailing list" toggle tidy inside the column. */
+#order-standard_cart .marketing-email-optin .bootstrap-switch {
+    margin-top: 6px;
+    max-width: 100%;
+}
+
+/* Space above the Order Summary when it stacks below the form on mobile, so it
+   isn't touching the mailing-list toggle. Padding (not margin) survives the
+   scroll script, which zeroes the container's margin-top while stacked. */
+@media only screen and (max-width: 991.98px) {
+    #order-standard_cart.hide-cart-side-panels #scrollingPanelContainer {
+        padding-top: 30px;
+    }
+}
+</style>
 
     <div class="row">
         <div class="cart-sidebar">
@@ -23,22 +69,9 @@
         </div>
         <div class="cart-body">
             <div class="header-lined">
-                <h1 class="font-size-36">{$LANG.orderForm.checkout}</h1>
+                <h1 class="font-size-36">{$LANG.cartreviewcheckout}</h1>
             </div>
             {include file="orderforms/standard_cart/sidebar-categories-collapsed.tpl"}
-
-            <div class="already-registered clearfix">
-                <div class="pull-right float-right">
-                    <button type="button" class="btn btn-info{if $loggedin || !$loggedin && $custtype eq "existing"} w-hidden{/if}" id="btnAlreadyRegistered">
-                        {$LANG.orderForm.alreadyRegistered}
-                    </button>
-                    <button type="button" class="btn btn-warning{if $loggedin || $custtype neq "existing"} w-hidden{/if}" id="btnNewUserSignup">
-                        {$LANG.orderForm.createAccount}
-                    </button>
-                </div>
-
-                <p class="text-sm-left overflow-hidden">{lang key='orderForm.enterPersonalDetails'}</p>
-            </div>
 
             <div class="alert alert-danger checkout-error-feedback {if !$errormessage}d-none{/if}" role="alert">
                 <p>{$LANG.orderForm.correctErrors}:</p>
@@ -50,24 +83,42 @@
                 </ul>
             </div>
 
-            <form method="post" action="{$smarty.server.PHP_SELF}?a=checkout" name="orderfrm" id="frmCheckout">
-                <input type="hidden" name="checkout" value="true" />
-                <input type="hidden" name="custtype" id="inputCustType" value="{$custtype}" />
-                {if $taxIdValidationEnabled}
-                    <input type="hidden" id="validation_tax_id" value="true">
-                {/if}
+            <div class="row">
+                <div class="secondary-cart-body">
 
-                {if $isTaxEUTaxExempt}
-                    <input type="hidden" id="isTaxEUTaxExempt" value="true">
-                {/if}
+                    {include file="orderforms/standard_cart/cart-review.tpl"}
 
-                {if $taxType !== ''}
-                    <input type="hidden" id="taxType" value="{$taxType}">
-                {/if}
+                    <form method="post" action="{$smarty.server.PHP_SELF}?a=checkout" name="orderfrm" id="frmCheckout">
+                        <input type="hidden" name="checkout" value="true" />
+                        <input type="hidden" name="custtype" id="inputCustType" value="{$custtype}" />
+                        {if $taxIdValidationEnabled}
+                            <input type="hidden" id="validation_tax_id" value="true">
+                        {/if}
 
-                {if $isTaxInclusiveDeduct}
-                    <input type="hidden" id="isTaxInclusiveDeduct" value="true">
-                {/if}
+                        {if $isTaxEUTaxExempt}
+                            <input type="hidden" id="isTaxEUTaxExempt" value="true">
+                        {/if}
+
+                        {if $taxType !== ''}
+                            <input type="hidden" id="taxType" value="{$taxType}">
+                        {/if}
+
+                        {if $isTaxInclusiveDeduct}
+                            <input type="hidden" id="isTaxInclusiveDeduct" value="true">
+                        {/if}
+
+                        <div class="already-registered clearfix">
+                            <div class="pull-right float-right">
+                                <button type="button" class="btn btn-info{if $loggedin || !$loggedin && $custtype eq "existing"} w-hidden{/if}" id="btnAlreadyRegistered">
+                                    {$LANG.orderForm.alreadyRegistered}
+                                </button>
+                                <button type="button" class="btn btn-warning{if $loggedin || $custtype neq "existing"} w-hidden{/if}" id="btnNewUserSignup">
+                                    {$LANG.orderForm.createAccount}
+                                </button>
+                            </div>
+                            <p class="text-sm-left overflow-hidden">{lang key='orderForm.enterPersonalDetails'}</p>
+                        </div>
+
 
                 {if $custtype neq "new" && $loggedin}
                     <div class="sub-heading">
@@ -568,9 +619,6 @@
                     <span class="primary-bg-color">{$LANG.orderForm.paymentDetails}</span>
                 </div>
 
-                <div class="alert alert-success text-center large-text" role="alert" id="totalDueToday">
-                    {$LANG.ordertotalduetoday}: &nbsp; <strong id="totalCartPrice">{$total}</strong>
-                </div>
 
                 <div id="applyCreditContainer" class="apply-credit-container{if !$canUseCreditOnCheckout} w-hidden{/if}" data-apply-credit="{$applyCredit}">
                     <p>{lang key='cart.availableCreditBalance' amount=$creditBalance}</p>
@@ -764,28 +812,99 @@
                     </div>
                 {/if}
 
-                <div class="text-center">
-                    {if $accepttos}
-                        <p>
-                            <label class="checkbox-inline">
-                                <input type="checkbox" name="accepttos" id="accepttos" />
-                                &nbsp;
-                                {$LANG.ordertosagreement}
-                                <a href="{$tosurl}" target="_blank">{$LANG.ordertos}</a>
-                            </label>
-                        </p>
-                    {/if}
+                    </form>
+                </div><!-- /.secondary-cart-body -->
 
-                    <button type="submit"
-                            id="btnCompleteOrder"
-                            class="btn btn-primary btn-lg disable-on-click spinner-on-click{if $captcha}{$captcha->getButtonClass($captchaForm)}{/if}"
-                            {if $cartitems==0}disabled="disabled"{/if}
-                    >
-                        {if $inExpressCheckout}{$LANG.confirmAndPay}{else}{$LANG.completeorder}{/if}
-                        &nbsp;<i class="fas fa-arrow-circle-right"></i>
-                    </button>
-                </div>
-            </form>
+                    <div class="secondary-cart-sidebar" id="scrollingPanelContainer">
+                        <div class="order-summary" id="orderSummary">
+                            <div class="loader w-hidden" id="orderSummaryLoader">
+                                <i class="fas fa-fw fa-sync fa-spin"></i>
+                            </div>
+                            <h2 class="font-size-30">{$LANG.ordersummary}</h2>
+                            <div class="summary-container">
+
+                                <div class="summary-figures">
+                                <div class="subtotal clearfix">
+                                    <span class="pull-left float-left">{$LANG.ordersubtotal}</span>
+                                    <span id="subtotal" class="pull-right float-right">{$subtotal}</span>
+                                </div>
+                                {if $promotioncode || $taxrate || $taxrate2}
+                                    <div class="bordered-totals">
+                                        {if $promotioncode}
+                                            <div class="clearfix">
+                                                <span class="pull-left float-left">{$promotiondescription}</span>
+                                                <span id="discount" class="pull-right float-right">{$discount}</span>
+                                            </div>
+                                        {/if}
+                                        {if $taxrate}
+                                            <div class="clearfix">
+                                                <span class="pull-left float-left">{$taxname} @ {$taxrate}%</span>
+                                                <span id="taxTotal1" class="pull-right float-right">{$taxtotal}</span>
+                                            </div>
+                                        {/if}
+                                        {if $taxrate2}
+                                            <div class="clearfix">
+                                                <span class="pull-left float-left">{$taxname2} @ {$taxrate2}%</span>
+                                                <span id="taxTotal2" class="pull-right float-right">{$taxtotal2}</span>
+                                            </div>
+                                        {/if}
+                                    </div>
+                                {/if}
+                                <div class="recurring-totals clearfix">
+                                    <span class="pull-left float-left">{$LANG.orderForm.totals}</span>
+                                    <span id="recurring" class="pull-right float-right recurring-charges">
+                                        <span id="recurringMonthly" {if !$totalrecurringmonthly}style="display:none;"{/if}>
+                                            <span class="cost">{$totalrecurringmonthly}</span> {$LANG.orderpaymenttermmonthly}<br />
+                                        </span>
+                                        <span id="recurringQuarterly" {if !$totalrecurringquarterly}style="display:none;"{/if}>
+                                            <span class="cost">{$totalrecurringquarterly}</span> {$LANG.orderpaymenttermquarterly}<br />
+                                        </span>
+                                        <span id="recurringSemiAnnually" {if !$totalrecurringsemiannually}style="display:none;"{/if}>
+                                            <span class="cost">{$totalrecurringsemiannually}</span> {$LANG.orderpaymenttermsemiannually}<br />
+                                        </span>
+                                        <span id="recurringAnnually" {if !$totalrecurringannually}style="display:none;"{/if}>
+                                            <span class="cost">{$totalrecurringannually}</span> {$LANG.orderpaymenttermannually}<br />
+                                        </span>
+                                        <span id="recurringBiennially" {if !$totalrecurringbiennially}style="display:none;"{/if}>
+                                            <span class="cost">{$totalrecurringbiennially}</span> {$LANG.orderpaymenttermbiennially}<br />
+                                        </span>
+                                        <span id="recurringTriennially" {if !$totalrecurringtriennially}style="display:none;"{/if}>
+                                            <span class="cost">{$totalrecurringtriennially}</span> {$LANG.orderpaymenttermtriennially}<br />
+                                        </span>
+                                    </span>
+                                </div>
+
+                                <div class="total-due-today total-due-today-padded">
+                                    <span class="amt" id="totalCartPrice">{$total}</span>
+                                    <span>{$LANG.ordertotalduetoday}</span>
+                                </div>
+                                </div><!-- /.summary-figures -->
+
+                                {if $accepttos}
+                                    <p class="text-center accepttos-container">
+                                        <label class="checkbox-inline">
+                                            <input type="checkbox" name="accepttos" id="accepttos" form="frmCheckout" />
+                                            &nbsp;
+                                            {$LANG.ordertosagreement}
+                                            <a href="{$tosurl}" target="_blank">{$LANG.ordertos}</a>
+                                        </label>
+                                    </p>
+                                {/if}
+
+                                <button type="submit"
+                                        id="btnCompleteOrder"
+                                        form="frmCheckout"
+                                        class="btn btn-primary btn-lg btn-block disable-on-click spinner-on-click{if $captcha}{$captcha->getButtonClass($captchaForm)}{/if}"
+                                        {if $cartitems==0}disabled="disabled"{/if}
+                                >
+                                    {if $inExpressCheckout}{$LANG.confirmAndPay}{else}{$LANG.completeorder}{/if}
+                                    &nbsp;<i class="fas fa-arrow-circle-right"></i>
+                                </button>
+
+                            </div>
+                        </div>
+                    </div><!-- /.secondary-cart-sidebar -->
+                </div><!-- /.row -->
 
             {if $servedOverSsl}
                 <div class="alert alert-warning checkout-security-msg">
@@ -803,4 +922,160 @@
     var hideCvcOnCheckoutForExistingCard = '{if $canUseCreditOnCheckout && $applyCredit && ($creditBalance->toNumeric() >= $total->toNumeric())}1{else}0{/if}';
 </script>
 <script type="text/javascript" src="{$BASE_PATH_JS}/CartTotalUpdater.js"></script>
+<script>
+// Re-measure the mailing-list toggle after the layout has fully settled so it
+// renders at the correct width inside the narrower column.
+jQuery(window).on('load', function () {
+    if (jQuery.prototype.bootstrapSwitch) {
+        var $optin = jQuery('.marketing-email-optin .toggle-switch-success');
+        if ($optin.length) {
+            $optin.bootstrapSwitch('destroy');
+            $optin.bootstrapSwitch({ onColor: 'success' });
+        }
+    }
+});
+
+// ---------------------------------------------------------------------------
+// Single-page cart editing (original implementation).
+//
+// standard_cart's cart edits (apply promo, change quantity, remove, empty,
+// estimate tax) are normal form posts that 302 to ?a=view. This intercepts
+// those submits, performs them in the background, then re-fetches the rendered
+// checkout page and swaps the two parts that changed -- the cart review and the
+// order-summary figures -- in place. The checkout form fields and the customer's
+// progress are never touched.
+//
+// It degrades gracefully: on any failure (or an old browser) it falls back to
+// the normal submit, and the companion return hook brings the customer back to
+// checkout, so the cart can never get stuck.
+// ---------------------------------------------------------------------------
+(function () {
+    var root = document.getElementById('order-standard_cart');
+    if (!root || !window.fetch || !window.FormData || !window.DOMParser) {
+        return; // unsupported browser -> native form behaviour
+    }
+
+    var CHECKOUT_URL = 'cart.php?a=checkout&e=false';
+
+    function setBusy(on) {
+        var loader = document.getElementById('orderSummaryLoader');
+        if (loader) { loader.classList.toggle('w-hidden', !on); }
+        var review = root.querySelector('.cart-review-merged');
+        if (review) {
+            review.style.opacity = on ? '0.5' : '';
+            review.style.pointerEvents = on ? 'none' : '';
+        }
+    }
+
+    function reinitInputs(scope) {
+        try {
+            if (window.jQuery && window.jQuery.fn.iCheck) {
+                window.jQuery(scope).find('input').not('.no-icheck').iCheck({
+                    checkboxClass: 'icheckbox_square-blue',
+                    radioClass: 'iradio_square-blue',
+                    increaseArea: '20%'
+                });
+            }
+        } catch (err) { /* non-fatal */ }
+    }
+
+    // Apply a cart edit:
+    //  1) swap the review from the EDIT response -- this is what carries WHMCS's
+    //     promo "accepted" / "invalid code" message, set only on the request
+    //     that processed the promo;
+    //  2) refresh the order-summary figures from a fresh checkout render, so the
+    //     totals are correct and rows (discount, tax) appear/disappear cleanly.
+    function applyEdit(editResponseHtml) {
+        var d1 = new DOMParser().parseFromString(editResponseHtml, 'text/html');
+        var src = d1.querySelector('.cart-review-merged') || d1.querySelector('.secondary-cart-body');
+        var curReview = root.querySelector('.cart-review-merged');
+        if (!curReview) { throw new Error('cart review container missing'); }
+        if (src) { curReview.innerHTML = src.innerHTML; reinitInputs(curReview); }
+
+        return fetch(CHECKOUT_URL, { credentials: 'same-origin' })
+            .then(function (r) { return r.text(); })
+            .then(function (checkoutHtml) {
+                var d2 = new DOMParser().parseFromString(checkoutHtml, 'text/html');
+                var review = root.querySelector('.cart-review-merged');
+                var isEmpty = !(review && review.querySelector('.view-cart-items .item'));
+
+                var newFigs = d2.querySelector('.summary-figures');
+                var curFigs = root.querySelector('.summary-figures');
+                if (newFigs && curFigs) {
+                    // Normal: checkout re-rendered -> swap the figures wholesale.
+                    curFigs.innerHTML = newFigs.innerHTML;
+                } else if (isEmpty && curFigs) {
+                    // Empty cart: ?a=checkout redirects to ?a=view (no .summary-figures).
+                    // Pull the $0 totals from that page and trim the discount / tax /
+                    // recurring rows so nothing stays stuck at the old amount.
+                    var z = d2.getElementById('subtotal') || d2.getElementById('totalDueToday');
+                    var zero = z ? z.innerHTML : '';
+                    var sub = curFigs.querySelector('#subtotal');
+                    var tot = curFigs.querySelector('#totalCartPrice');
+                    if (sub && zero) { sub.innerHTML = zero; }
+                    if (tot && zero) { tot.innerHTML = zero; }
+                    var bt = curFigs.querySelector('.bordered-totals'); if (bt) { bt.style.display = 'none'; }
+                    var rt = curFigs.querySelector('.recurring-totals'); if (rt) { rt.style.display = 'none'; }
+                }
+
+                // When the cart is empty, hide the sign-up / payment form and the
+                // TOS line, and disable the button; restore them otherwise.
+                var form = document.getElementById('frmCheckout');
+                if (form) { form.style.display = isEmpty ? 'none' : ''; }
+                var tos = document.querySelector('.accepttos-container');
+                if (tos) { tos.style.display = isEmpty ? 'none' : ''; }
+                var btn = document.getElementById('btnCompleteOrder');
+                if (btn) { btn.disabled = isEmpty; }
+            });
+    }
+
+    root.addEventListener('submit', function (e) {
+        var form = e.target;
+        if (!form || form.id === 'frmCheckout') { return; }            // leave checkout alone
+        if ((form.getAttribute('action') || '').indexOf('cart.php') === -1) { return; }
+
+        e.preventDefault();
+        setBusy(true);
+
+        var fd = new FormData(form);
+        if (e.submitter && e.submitter.name) {                          // include the clicked button
+            fd.append(e.submitter.name, e.submitter.value || '');
+        }
+
+        fetch(form.action, { method: 'POST', credentials: 'same-origin', body: fd })
+            .then(function (r) { return r.text(); })
+            .then(function (editResponseHtml) { return applyEdit(editResponseHtml); })
+            .then(function () {
+                setBusy(false);
+                if (window.jQuery) { window.jQuery('#modalRemoveItem, #modalEmptyCart').modal('hide'); }
+            })
+            .catch(function () {
+                // Fallback: native submit + flag so the return hook restores checkout.
+                document.cookie = 'cartReturnToCheckout=1; path=/; max-age=30';
+                form.submit();
+            });
+    }, true);
+
+    // Promo removal is a link (a=removepromo), not a form, so the submit handler
+    // never sees it. Intercept the click and run it through the same in-place
+    // update so it no longer bounces to View Cart.
+    root.addEventListener('click', function (e) {
+        var a = (e.target && e.target.closest) ? e.target.closest('a[href*="a=removepromo"]') : null;
+        if (!a) { return; }
+        e.preventDefault();
+        setBusy(true);
+        fetch(a.href, { credentials: 'same-origin' })
+            .then(function (r) { return r.text(); })
+            .then(function (editResponseHtml) { return applyEdit(editResponseHtml); })
+            .then(function () {
+                setBusy(false);
+                if (window.jQuery) { window.jQuery('#modalRemoveItem, #modalEmptyCart').modal('hide'); }
+            })
+            .catch(function () {
+                document.cookie = 'cartReturnToCheckout=1; path=/; max-age=30';
+                window.location.href = a.href;
+            });
+    }, true);
+})();
+</script>
 {include file="orderforms/standard_cart/recommendations-modal.tpl"}

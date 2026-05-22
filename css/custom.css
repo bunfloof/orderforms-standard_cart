@@ -1,0 +1,39 @@
+/**
+ * Custom overrides for the standard_cart order form.
+ * Auto-loaded by common.tpl AFTER all.min.css, so these rules win.
+ *
+ * Applies only to templates carrying the .hide-cart-side-panels marker
+ * class on their #order-standard_cart wrapper (currently viewcart.tpl and
+ * configureproduct.tpl). products.tpl is intentionally left untouched.
+ */
+
+/* 1) Hide the "Categories" and "Actions" sidebar (and its mobile dropdown). */
+#order-standard_cart.hide-cart-side-panels .cart-sidebar,
+#order-standard_cart.hide-cart-side-panels .sidebar-collapsed {
+    display: none !important;
+}
+
+/* 2) Let the cart content span the full width now that the sidebar is gone. */
+#order-standard_cart.hide-cart-side-panels .cart-body {
+    float: none;
+    width: 100%;
+}
+
+/* 3) Keep the Order Summary column at the SAME absolute width it had in the
+   original 3-column layout.
+   Originally: .cart-body = 75% of page, and .secondary-cart-sidebar = 35%
+   of .cart-body  ->  0.35 * 0.75 = 26.25% of the page.
+   Now that .cart-body is 100%, we set the columns directly so Order Summary
+   stays 26.25% of the page and the cart-items column absorbs the rest.
+
+   Scoped to >=1200px only: below that breakpoint the base theme already
+   hides the left sidebar and uses its own responsive widths, so we leave
+   those untouched. */
+@media only screen and (min-width: 1200px) {
+    #order-standard_cart.hide-cart-side-panels .secondary-cart-body {
+        width: 73.75%;
+    }
+    #order-standard_cart.hide-cart-side-panels .secondary-cart-sidebar {
+        width: 26.25%;
+    }
+}

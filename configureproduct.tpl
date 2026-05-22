@@ -7,7 +7,34 @@ var _localLang = {
 }
 </script>
 
-<div id="order-standard_cart">
+<div id="order-standard_cart" class="hide-cart-side-panels">
+<style>
+/* Cart-page layout overrides. Inlined on purpose: WHMCS caches the
+   external custom.css under a fixed ?v= hash, so edits to that file can
+   be ignored by the browser. Inline rules ship with the page HTML and
+   always reflect the current template. */
+/* Hide the Categories + Actions sidebar (and its mobile dropdown). */
+#order-standard_cart.hide-cart-side-panels .cart-sidebar,
+#order-standard_cart.hide-cart-side-panels .sidebar-collapsed {
+    display: none !important;
+}
+/* Let the cart content fill the freed width. */
+#order-standard_cart.hide-cart-side-panels .cart-body {
+    float: none;
+    width: 100%;
+}
+/* On >=1200px only, pin Order Summary to its original 3-column width
+   (35% of the old 75% body = 26.25% of the page). Below 1200px the base
+   theme already handles the layout the way you want, so we leave it. */
+@media only screen and (min-width: 1200px) {
+    #order-standard_cart.hide-cart-side-panels .secondary-cart-body {
+        width: 73.75%;
+    }
+    #order-standard_cart.hide-cart-side-panels .secondary-cart-sidebar {
+        width: 26.25%;
+    }
+}
+</style>
 
     <div class="row">
         <div class="cart-sidebar">
@@ -320,11 +347,6 @@ var _localLang = {
                             </div>
                         {/if}
 
-                        <div class="alert alert-warning info-text-sm">
-                            <i class="fas fa-question-circle"></i>
-                            {$LANG.orderForm.haveQuestionsContact} <a href="{$WEB_ROOT}/contact.php" target="_blank" class="alert-link">{$LANG.orderForm.haveQuestionsClickHere}</a>
-                        </div>
-
                     </div>
                     <div class="secondary-cart-sidebar" id="scrollingPanelContainer">
 
@@ -354,5 +376,20 @@ var _localLang = {
 </div>
 
 <script>recalctotals();</script>
+
+<script>
+// "Continue" submits the product config, which flows through confdomains and on
+// to View Cart. Set the return flag (capture phase, before the core handler
+// runs) so the companion hook forwards the customer straight to the single-page
+// checkout instead of stopping at View Cart.
+(function () {
+    var form = document.getElementById('frmConfigureProduct');
+    if (form) {
+        form.addEventListener('submit', function () {
+            document.cookie = 'cartReturnToCheckout=1; path=/; max-age=120';
+        }, true);
+    }
+})();
+</script>
 
 {include file="orderforms/standard_cart/recommendations-modal.tpl"}
